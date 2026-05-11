@@ -1,0 +1,199 @@
+/* =========================
+   CONTENEDOR GENERAL
+========================= */
+.productos-admin .dataTables_wrapper {
+    font-size: 13px;
+}
+
+/* =========================
+   TABLA
+========================= */
+.productos-admin table.dataTable {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100% !important;
+}
+
+/* =========================
+   HEADERS
+========================= */
+.productos-admin table.dataTable thead th {
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    padding: 12px 14px;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+/* =========================
+   FILAS
+========================= */
+.productos-admin table.dataTable tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+/* HOVER FILAS */
+.productos-admin table.dataTable tbody tr {
+    transition: background-color .2s ease, transform .15s ease;
+}
+
+.productos-admin table.dataTable tbody tr:hover {
+    background: #f8fafc;
+    transform: translateY(-1px);
+}
+
+/* =========================
+   OCULTAR BUSCADOR DEFAULT
+========================= */
+.productos-admin .dataTables_filter {
+    display: none !important;
+}
+
+/* =========================
+   SELECT "Mostrar X"
+========================= */
+.productos-admin .dataTables_length {
+    display: flex;
+    align-items: center;
+}
+
+.productos-admin .dataTables_length label {
+    font-size: 13px;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* SELECT PEQUEÑO */
+.productos-admin .dataTables_length select {
+    height: 26px !important;
+    padding: 2px 14px 2px 6px !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+    border: 1px solid #cbd5e1 !important;
+    min-width: 55px !important;
+    width: auto !important;
+}
+
+/* =========================
+   TEXTO INFO
+========================= */
+.productos-admin .dataTables_info {
+    font-size: 12px;
+    color: #64748b;
+}
+
+/* =========================
+   PAGINACIÓN (FIX REAL)
+========================= */
+.productos-admin .dataTables_wrapper .dataTables_paginate {
+    display: flex !important;
+    gap: 6px;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* BOTONES PAGINADOR */
+.productos-admin .dataTables_wrapper .dataTables_paginate a.paginate_button {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 6px !important;
+    padding: 4px 10px !important;
+    font-size: 12px !important;
+    min-width: 32px;
+    margin: 0 3px !important;
+    color: #334155 !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+}
+
+/* HOVER */
+.productos-admin .dataTables_wrapper .dataTables_paginate a.paginate_button:hover {
+    background: #0f172a !important;
+    color: #fff !important;
+}
+
+/* ACTIVO */
+.productos-admin .dataTables_wrapper .dataTables_paginate a.paginate_button.current {
+    background: #0f172a !important;
+    color: #fff !important;
+}
+
+/* DISABLED */
+.productos-admin .dataTables_wrapper .dataTables_paginate a.paginate_button.disabled {
+    opacity: 0.4;
+    cursor: not-allowed !important;
+}
+
+/* =========================
+   TOP / BOTTOM LAYOUT
+========================= */
+.productos-admin .top-bar,
+.productos-admin .bottom-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* =========================
+   BOTONES (MICRO UX)
+========================= */
+.productos-admin .btn-stock,
+.productos-admin .ver-imagen {
+    transition: transform .15s ease, background-color .2s ease;
+}
+
+.productos-admin .btn-stock:hover,
+.productos-admin .ver-imagen:hover {
+    transform: translateY(-1px);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 768px) {
+
+    .productos-admin .bottom-bar {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .productos-admin .dataTables_info {
+        text-align: center;
+    }
+
+}
+
+/* FORZAR ESTILOS PAGINACIÓN */
+.productos-admin .dataTables_wrapper .dataTables_paginate a.paginate_button {
+    display: inline-flex !important;
+    margin: 0 4px !important;
+    padding: 4px 10px !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    color: #334155 !important;
+}
+
+.productos-admin .dataTables_wrapper .dataTables_paginate a.paginate_button:hover {
+    background: #0f172a !important;
+    color: white !important;
+}
+
+.productos-admin .dataTables_wrapper .dataTables_paginate a.paginate_button.current {
+    background: #0f172a !important;
+    color: white !important;
+}
