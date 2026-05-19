@@ -9,32 +9,120 @@ use Illuminate\Support\Facades\Log;
 
 class CartController extends Controller
 {
+    public function getStats()
+    {
+        try {
+            // 1. Pendientes: Contar usuarios únicos que tienen items en su carrito
+            $pendientes = DB::table('carrito')
+                ->join('carrito_detalle', 'carrito.id', '=', 'carrito_detalle.carrito_id')
+                ->distinct('carrito.usuario_id')
+                ->count('carrito.usuario_id');
+
+            // 2. Ventas: Suma total considerando precios de variaciones o precios base
+            $totalVentas = DB::table('carrito_detalle')
+                ->join('producto_variacions', 'carrito_detalle.producto_variacion_id', '=', 'producto_variacions.id')
+                ->join('productos', 'producto_variacions.producto_id', '=', 'productos.id')
+                ->select(DB::raw('SUM(COALESCE(producto_variacions.precio, 0) * carrito_detalle.cantidad) as total'))
+                ->first()->total ?? 0;
+
+            // 3. Stock Bajo: Variaciones con stock < 5
+            $stockBajo = DB::table('producto_variacions')
+                ->where('stock', '<', 5)
+                ->count();
+
+            // 4. Pedidos Recientes: Obtener los últimos 5 carritos con actividad
+            $pedidosRecientes = DB::table('carrito')
+                ->join('users', 'carrito.usuario_id', '=', 'users.id')
+                ->join('carrito_detalle', 'carrito.id', '=', 'carrito_detalle.carrito_id')
+                ->join('producto_variacions', 'carrito_detalle.producto_variacion_id', '=', 'producto_variacions.id')
+                ->select(
+                    'carrito.id',
+                    DB::raw('CONCAT(users.nombres, " ", users.apellidos) as cliente'),
+                    DB::raw('SUM(COALESCE(producto_variacions.precio, 0) * carrito_detalle.cantidad) as total'),
+                    DB::raw('"Pendiente" as estado')
+                )
+                ->groupBy('carrito.id', 'users.nombres', 'users.apellidos')
+                ->orderBy('carrito.id', 'desc')
+                ->limit(5)
+                ->get();
+
+            return response()->json([
+                'pendientes' => $pendientes,
+                'ventas' => (int)$totalVentas,
+                'stock_bajo' => $stockBajo,
+                'completados' => 0,
+                'pedidos_recientes' => $pedidosRecientes
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error en getStats: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getAdminStats()
+    {
+        try {
+            // Contar desde las tablas reales en plural
+            $totalProductos = \DB::table('productos')->count();
+            $stockBajo = \DB::table('producto_variacions')->where('stock', '<', 10)->count();
+            $pedidosPendientes = \DB::table('pedidos')->where('estado', 'pendiente')->count();
+            $pedidosCompletados = \DB::table('pedidos')->where('estado', 'completado')->count();
+
+            return response()->json([
+                'pendientes' => $pedidosPendientes,
+                'ventas' => $pedidosCompletados, // O ingresos totales si prefieres
+                'stock_bajo' => $stockBajo,
+                'completados' => $totalProductos, // Usamos esto para mostrar "Total Productos" en una de las tarjetas
+                'pedidos_recientes' => []
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error en getAdminStats: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
     public function index(Request $request)
     {
-        $usuarioId = $request->query('user_id');
-        
-        if (!$usuarioId) {
-            return response()->json(['error' => 'Usuario no proporcionado'], 400);
+        try {
+            $usuarioId = $request->query('user_id');
+            
+            if (!$usuarioId) {
+                return response()->json(['error' => 'Usuario no proporcionado'], 400);
+            }
+
+            // --- LÓGICA DE LIMPIEZA AUTOMÁTICA (3 DÍAS) ---
+            // Borra registros en carrito_detalle que tengan más de 3 días basándose en la fecha del carrito
+            $fechaLimite = now()->subDays(3);
+            
+            DB::table('carrito_detalle')
+                ->join('carrito', 'carrito_detalle.carrito_id', '=', 'carrito.id')
+                ->where('carrito.usuario_id', $usuarioId)
+                ->where('carrito.fecha', '<', $fechaLimite)
+                ->delete();
+            // ----------------------------------------------
+
+            $items = DB::table('carrito')
+                ->join('carrito_detalle', 'carrito.id', '=', 'carrito_detalle.carrito_id')
+                ->join('producto_variacion', 'carrito_detalle.producto_variacion_id', '=', 'producto_variacion.id')
+                ->join('producto', 'producto_variacion.producto_id', '=', 'producto.id')
+                ->join('modelo', 'producto.modelo_id', '=', 'modelo.id')
+                ->join('talla', 'producto_variacion.talla_id', '=', 'talla.id')
+                ->where('carrito.usuario_id', $usuarioId)
+                ->select(
+                    'carrito_detalle.id as item_id',
+                    'producto.id as producto_id',
+                    'modelo.nombre',
+                    'producto_variacion.precio',
+                    'talla.numero as talla',
+                    'carrito_detalle.cantidad'
+                )
+                ->get();
+
+            return response()->json($items);
+        } catch (\Exception $e) {
+            Log::error('Error en CartController@index: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        $items = DB::table('carrito')
-            ->join('carrito_detalle', 'carrito.id', '=', 'carrito_detalle.carrito_id')
-            ->join('producto_variacion', 'carrito_detalle.producto_variacion_id', '=', 'producto_variacion.id')
-            ->join('producto', 'producto_variacion.producto_id', '=', 'producto.id')
-            ->join('modelo', 'producto.modelo_id', '=', 'modelo.id')
-            ->join('talla', 'producto_variacion.talla_id', '=', 'talla.id')
-            ->where('carrito.usuario_id', $usuarioId)
-            ->select(
-                'carrito_detalle.id as item_id',
-                'producto.id as producto_id',
-                'modelo.nombre',
-                DB::raw('COALESCE(producto_variacion.precio, 0) as precio'),
-                'talla.numero as talla',
-                'carrito_detalle.cantidad'
-            )
-            ->get();
-
-        return response()->json($items);
     }
 
     public function add(Request $request)
@@ -103,6 +191,8 @@ class CartController extends Controller
                 ]);
             } else {
                 $carritoId = $carrito->id;
+                // Actualizar la fecha del carrito para que los 3 días cuenten desde la última actividad
+                DB::table('carrito')->where('id', $carritoId)->update(['fecha' => now()]);
             }
 
             // 3. Verificar si el item ya existe en el carrito

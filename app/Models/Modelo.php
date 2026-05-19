@@ -6,24 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Modelo extends Model
 {
-    protected $table = 'modelo';
-
-    public $timestamps = false; // 🔥 IMPORTANTE
-
-    protected $fillable = [
-        'nombre',
-        'categoria_id'
-    ];
-
-    // 🔗 RELACIONES
+    protected $table = 'modelos';
+    public $timestamps = false;
+    protected $fillable = ['nombre', 'categoria_id'];
 
     public function categoria()
     {
-        return $this->belongsTo(Categoria::class);
+        return $this->belongsTo(Categoria::class, 'categoria_id');
     }
 
     public function productos()
     {
-        return $this->hasMany(Producto::class);
+        return $this->hasMany(Producto::class, 'modelo_id');
     }
 }

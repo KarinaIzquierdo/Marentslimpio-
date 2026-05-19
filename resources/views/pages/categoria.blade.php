@@ -36,17 +36,11 @@
 
             @include('components.product-card', [
                 'id' => $producto->id,
-                'imagen' => $producto->imagen?->url,
-                'nombre' => $producto->modelo->nombre,
-                'tallas' => $producto->variaciones
-                                ->where('stock', '>', 0)
-                                ->pluck('talla.numero')
-                                ->unique()
-                                ->implode(','),
-                'precio' => $producto->variaciones
-                                ->where('stock', '>', 0)
-                                ->avg('precio'),
-                'categoria' => strtolower($producto->modelo->categoria->nombre)
+                'imagen' => $producto->imagen,
+                'nombre' => $producto->modelo_nombre,
+                'tallas' => 'N/A',
+                'precio' => $producto->precio_min,
+                'categoria' => strtolower($categoria)
             ])
 
         @endforeach

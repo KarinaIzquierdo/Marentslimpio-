@@ -6,17 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Categoria extends Model
 {
-    protected $table = 'categoria';
+    protected $table = 'categorias';
+    public $timestamps = false;
+    protected $fillable = ['nombre'];
 
-    public $timestamps = false; // 🔥 IMPORTANTE
-
-    protected $fillable = [
-        'nombre'
-    ];
-
-    // 🔗 RELACIÓN
     public function modelos()
     {
-        return $this->hasMany(Modelo::class);
+        return $this->hasMany(Modelo::class, 'categoria_id');
     }
 }
