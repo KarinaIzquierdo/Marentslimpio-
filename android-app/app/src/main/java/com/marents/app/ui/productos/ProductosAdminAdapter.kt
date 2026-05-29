@@ -14,7 +14,16 @@ import com.marents.app.R
 class ProductosAdminAdapter(
     private val onEditClick: (Producto) -> Unit,
     private val onDeleteClick: (Producto) -> Unit
-) : ListAdapter<Producto, ProductosAdminAdapter.ProductoViewHolder>(ProductoDiffCallback()) {
+) : RecyclerView.Adapter<ProductosAdminAdapter.ProductoViewHolder>() {
+
+    private var productos: List<Producto> = emptyList()
+
+    fun submitList(newList: List<Producto>) {
+        productos = newList
+        notifyDataSetChanged()
+    }
+
+    override fun getItemCount(): Int = productos.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductoViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -23,7 +32,7 @@ class ProductosAdminAdapter(
     }
 
     override fun onBindViewHolder(holder: ProductoViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(productos[position])
     }
 
     class ProductoViewHolder(

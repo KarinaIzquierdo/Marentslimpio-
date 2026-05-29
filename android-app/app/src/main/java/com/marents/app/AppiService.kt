@@ -59,6 +59,7 @@ interface ApiService {
         @Field("stock") stock: Int
     ): Call<Void>
 
+    @FormUrlEncoded
     @PUT("productos/{id}")
     fun actualizarProducto(@Path("id") id: Int, @FieldMap params: Map<String, String>): Call<Map<String, Any>>
 

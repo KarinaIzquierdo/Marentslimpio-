@@ -12,43 +12,56 @@
 
         <div class="flex flex-wrap gap-2">
             <button id="btnStockGlobal"
-                class="bg-slate-800 text-white px-4 py-2 rounded-xl shadow hover:bg-slate-900 transition">
+                class="bg-[#3D49B8] text-white px-8 py-3 rounded-xl shadow-sm hover:opacity-90 transition font-medium text-sm">
                 Gestión existencias
             </button>
 
             <button id="btnNuevoProducto"
-                class="bg-black text-white px-4 py-2 rounded-xl shadow hover:bg-gray-900 transition">
+                class="bg-white text-[#3D49B8] border-2 border-[#3D49B8] px-8 py-3 rounded-xl shadow-sm hover:bg-blue-50 transition font-medium text-sm">
                 + Nuevo producto
             </button>
         </div>
     </div>
 
     <!-- FILTROS -->
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-4">
-        <div class="flex flex-wrap items-center gap-3">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <div class="flex flex-col space-y-4">
+            <!-- BUSCADOR -->
+            <div class="relative w-full">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </span>
+                <input id="buscar"
+                    type="text"
+                    placeholder="Buscar producto..."
+                    class="border border-gray-200 rounded-xl pl-10 pr-3 py-3 text-base w-full focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all bg-gray-50/50">
+            </div>
 
-            <input id="buscar"
-                type="text"
-                placeholder="Buscar producto..."
-                class="border border-gray-300 rounded-xl px-3 py-2 text-sm w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-slate-300">
+            <!-- SELECTS -->
+            <div class="flex flex-wrap gap-4">
+                <div class="flex-1 min-w-[200px]">
+                    <select id="filtroCategoria"
+                        class="border border-gray-200 rounded-xl px-4 py-3 text-base w-full focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all bg-gray-50/50 appearance-none cursor-pointer">
+                        <option value="">Todas las categorías</option>
+                        @foreach($categorias as $cat)
+                            <option value="{{ $cat->nombre }}">
+                                {{ $cat->nombre }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
-            <select id="filtroCategoria"
-                class="border border-gray-300 rounded-xl px-3 py-2 text-sm min-w-[180px] focus:outline-none focus:ring-2 focus:ring-slate-300">
-                <option value="">Todas las categorías</option>
-                @foreach($categorias as $cat)
-                    <option value="{{ $cat->nombre }}">
-                        {{ $cat->nombre }}
-                    </option>
-                @endforeach
-            </select>
-
-            <select id="ordenStock"
-                class="border border-gray-300 rounded-xl px-3 py-2 text-sm min-w-[180px] focus:outline-none focus:ring-2 focus:ring-slate-300">
-                <option value="">Ordenar stock</option>
-                <option value="mayor">Mayor a menor</option>
-                <option value="menor">Menor a mayor</option>
-            </select>
-
+                <div class="flex-1 min-w-[200px]">
+                    <select id="ordenStock"
+                        class="border border-gray-200 rounded-xl px-4 py-3 text-base w-full focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all bg-gray-50/50 appearance-none cursor-pointer">
+                        <option value="">Ordenar: stock</option>
+                        <option value="mayor">Mayor a menor</option>
+                        <option value="menor">Menor a mayor</option>
+                    </select>
+                </div>
+            </div>
         </div>
     </div>
 

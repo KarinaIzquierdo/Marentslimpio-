@@ -20,13 +20,13 @@ class CartController extends Controller
 
             // 2. Ventas: Suma total considerando precios de variaciones o precios base
             $totalVentas = DB::table('carrito_detalle')
-                ->join('producto_variacions', 'carrito_detalle.producto_variacion_id', '=', 'producto_variacions.id')
-                ->join('productos', 'producto_variacions.producto_id', '=', 'productos.id')
-                ->select(DB::raw('SUM(COALESCE(producto_variacions.precio, 0) * carrito_detalle.cantidad) as total'))
+                ->join('producto_variacion', 'carrito_detalle.producto_variacion_id', '=', 'producto_variacion.id')
+                ->join('producto', 'producto_variacion.producto_id', '=', 'producto.id')
+                ->select(DB::raw('SUM(COALESCE(producto_variacion.precio, 0) * carrito_detalle.cantidad) as total'))
                 ->first()->total ?? 0;
 
             // 3. Stock Bajo: Variaciones con stock < 5
-            $stockBajo = DB::table('producto_variacions')
+            $stockBajo = DB::table('producto_variacion')
                 ->where('stock', '<', 5)
                 ->count();
 
@@ -34,11 +34,11 @@ class CartController extends Controller
             $pedidosRecientes = DB::table('carrito')
                 ->join('users', 'carrito.usuario_id', '=', 'users.id')
                 ->join('carrito_detalle', 'carrito.id', '=', 'carrito_detalle.carrito_id')
-                ->join('producto_variacions', 'carrito_detalle.producto_variacion_id', '=', 'producto_variacions.id')
+                ->join('producto_variacion', 'carrito_detalle.producto_variacion_id', '=', 'producto_variacion.id')
                 ->select(
                     'carrito.id',
                     DB::raw('CONCAT(users.nombres, " ", users.apellidos) as cliente'),
-                    DB::raw('SUM(COALESCE(producto_variacions.precio, 0) * carrito_detalle.cantidad) as total'),
+                    DB::raw('SUM(COALESCE(producto_variacion.precio, 0) * carrito_detalle.cantidad) as total'),
                     DB::raw('"Pendiente" as estado')
                 )
                 ->groupBy('carrito.id', 'users.nombres', 'users.apellidos')

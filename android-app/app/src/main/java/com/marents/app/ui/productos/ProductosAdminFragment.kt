@@ -39,11 +39,8 @@ class ProductosAdminFragment : Fragment() {
         setupSpinners()
         setupClickListeners()
         observeViewModel()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        // Forzar recarga de productos al volver a la pantalla o entrar por primera vez
+        
+        // Cargar productos inmediatamente al entrar
         viewModel.cargarProductos()
     }
 
@@ -102,11 +99,6 @@ class ProductosAdminFragment : Fragment() {
 
         binding.btnBack.setOnClickListener {
             requireActivity().onBackPressed()
-        }
-
-        binding.btnHome.setOnClickListener {
-            // Regresar al inicio del nav_host o actividad principal
-            requireActivity().finish()
         }
 
         binding.btnGestionExistencias.setOnClickListener {

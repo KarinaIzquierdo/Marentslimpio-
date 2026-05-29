@@ -32,14 +32,6 @@
             android:textColor="#111827"
             android:textSize="20sp"
             android:textStyle="bold" />
-
-        <ImageButton
-            android:id="@+id/btnHome"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_home"
-            app:tint="#111827" />
     </LinearLayout>
 
     <ScrollView
@@ -59,30 +51,37 @@
                 android:orientation="horizontal"
                 android:gravity="center">
 
-                <Button
-                    android:id="@+id/btnGestionExistencias"
-                    android:layout_width="0dp"
-                    android:layout_height="50dp"
-                    android:layout_weight="1"
-                    android:text="Gestión existencias"
-                    android:textAllCaps="false"
-                    android:backgroundTint="#3B82F6"
-                    android:textColor="#FFFFFF"
-                    app:cornerRadius="8dp"
-                    android:layout_marginEnd="8dp" />
+                    <Button
+                        android:id="@+id/btnGestionExistencias"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_weight="1"
+                        android:text="Gestión existencias"
+                        android:textAllCaps="false"
+                        android:backgroundTint="#3D49B8"
+                        android:textColor="#FFFFFF"
+                        app:cornerRadius="12dp"
+                        android:layout_marginEnd="12dp"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:elevation="0dp" />
 
-                <Button
-                    android:id="@+id/btnNuevoProducto"
-                    android:layout_width="0dp"
-                    android:layout_height="50dp"
-                    android:layout_weight="1"
-                    android:text="+ Nuevo producto"
-                    android:textAllCaps="false"
-                    android:backgroundTint="#FFFFFF"
-                    android:textColor="#3B82F6"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    app:strokeColor="#3B82F6"
-                    app:cornerRadius="8dp" />
+                    <Button
+                        android:id="@+id/btnNuevoProducto"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_weight="1"
+                        android:text="+ Nuevo producto"
+                        android:textAllCaps="false"
+                        android:backgroundTint="#FFFFFF"
+                        android:textColor="#3D49B8"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        app:strokeColor="#3D49B8"
+                        app:strokeWidth="2dp"
+                        app:cornerRadius="12dp"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:elevation="0dp" />
             </LinearLayout>
 
             <!-- Card de Filtros -->
@@ -99,37 +98,45 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <EditText
-                        android:id="@+id/etBuscar"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_input_field"
-                        android:hint="Buscar producto..."
-                        android:paddingHorizontal="16dp"
-                        android:drawableStart="@drawable/ic_shoe_placeholder"
-                        android:drawablePadding="12dp" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="12dp">
-
-                        <Spinner
-                            android:id="@+id/spinnerCategorias"
-                            android:layout_width="0dp"
-                            android:layout_height="48dp"
-                            android:layout_weight="1"
+                        <EditText
+                            android:id="@+id/etBuscar"
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
                             android:background="@drawable/bg_input_field"
-                            android:layout_marginEnd="8dp" />
+                            android:hint="Buscar producto..."
+                            android:paddingHorizontal="16dp"
+                            android:drawableStart="@drawable/ic_search"
+                        
+                        
+                            android:drawablePadding="12dp"
+                            android:textSize="16sp"
+                            android:textColor="#111827"
+                            android:textColorHint="#9CA3AF"
+                             />
 
-                        <Spinner
-                            android:id="@+id/spinnerOrdenar"
-                            android:layout_width="0dp"
-                            android:layout_height="48dp"
-                            android:layout_weight="1"
-                            android:background="@drawable/bg_input_field" />
-                    </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="16dp">
+
+                            <Spinner
+                                android:id="@+id/spinnerCategorias"
+                                android:layout_width="0dp"
+                                android:layout_height="56dp"
+                                android:layout_weight="1"
+                                android:background="@drawable/bg_input_field"
+                                android:layout_marginEnd="12dp"
+                                android:paddingHorizontal="8dp" />
+
+                            <Spinner
+                                android:id="@+id/spinnerOrdenar"
+                                android:layout_width="0dp"
+                                android:layout_height="56dp"
+                                android:layout_weight="1"
+                                android:background="@drawable/bg_input_field"
+                                android:paddingHorizontal="8dp" />
+                        </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
