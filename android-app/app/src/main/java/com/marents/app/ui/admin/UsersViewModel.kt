@@ -100,6 +100,33 @@ class UsersViewModel : ViewModel() {
         }
     }
 
+    fun crearUsuario(nombres: String, apellidos: String, email: String, documento: String?, celular: String?, rol: String, password: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    RetrofitClient.apiService.crearUsuario(nombres, apellidos, email, documento, celular, rol, password).execute()
+                }
+
+                if (response.isSuccessful) {
+                    // Recargar la lista de usuarios para mostrar el nuevo
+                    cargarUsuarios()
+                } else {
+                    when (response.code()) {
+                        422 -> _error.value = "El correo o documento ya están registrados"
+                        else -> _error.value = "Error al crear usuario: ${response.code()}"
+                    }
+                }
+            } catch (e: Exception) {
+                _error.value = "Error de conexión al crear: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
     fun limpiarError() {
         _error.value = null
     }

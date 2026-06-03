@@ -73,8 +73,10 @@ class CrearProductoFragment : Fragment() {
         }
 
         binding.btnSelectImage.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-            selectImageLauncher.launch(intent)
+            val intent = Intent(Intent.ACTION_GET_CONTENT)
+            intent.type = "image/*"
+            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            selectImageLauncher.launch(Intent.createChooser(intent, "Selecciona una foto"))
         }
 
         binding.btnGuardar.setOnClickListener {

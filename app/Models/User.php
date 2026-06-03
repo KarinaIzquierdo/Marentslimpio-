@@ -18,6 +18,7 @@ class User extends Authenticatable
         'email',
         'password',
         'rol',
+        'estado',
     ];
 
     protected function casts(): array

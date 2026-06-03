@@ -69,7 +69,7 @@ class EditarProductoFragment : Fragment() {
             
             // Seleccionar categoría
             val categoriaNombre = producto.modelo?.categoria?.nombre ?: ""
-            val categorias = arrayOf("Seleccionar categoría", "Hombre", "Mujer", "Niño", "Pisa huevos")
+            val categorias = arrayOf("Seleccionar categoría", "Hombre", "mujer", "Niños", "Pisa huevos", "Outlet")
             val index = categorias.indexOfFirst { it.equals(categoriaNombre, ignoreCase = true) }
             if (index != -1) binding.spinnerCategoria.setSelection(index)
             
@@ -82,7 +82,7 @@ class EditarProductoFragment : Fragment() {
     }
 
     private fun setupSpinners() {
-        val categorias = arrayOf("Seleccionar categoría", "Hombre", "Mujer", "Niño", "Pisa huevos")
+        val categorias = arrayOf("Seleccionar categoría", "Hombre", "mujer", "Niños", "Pisa huevos", "Outlet")
         val categoriaAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, categorias)
         categoriaAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerCategoria.adapter = categoriaAdapter
@@ -131,11 +131,12 @@ class EditarProductoFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 val categoriaId = when (categoria) {
-                    "Hombre" -> 1
-                    "Mujer" -> 2
-                    "Niño" -> 3
-                    "Pisa huevos" -> 4
-                    else -> 1
+                    "Hombre" -> 9
+                    "mujer" -> 10
+                    "Niños" -> 11
+                    "Pisa huevos" -> 12
+                    "Outlet" -> 13
+                    else -> 9
                 }
 
                 val requestBody = hashMapOf(
@@ -154,6 +155,12 @@ class EditarProductoFragment : Fragment() {
                 if (isAdded) {
                     if (response.isSuccessful) {
                         Toast.makeText(requireContext(), "Producto actualizado correctamente", Toast.LENGTH_SHORT).show()
+                        
+                        // Notificar que hubo cambios antes de volver
+                        val result = Bundle()
+                        result.putBoolean("updated", true)
+                        parentFragmentManager.setFragmentResult("requestKey", result)
+                        
                         parentFragmentManager.popBackStack()
                     } else {
                         Toast.makeText(requireContext(), "Error al actualizar: ${response.code()}", Toast.LENGTH_SHORT).show()

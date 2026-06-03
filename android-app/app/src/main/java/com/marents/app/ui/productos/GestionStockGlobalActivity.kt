@@ -185,10 +185,17 @@ class GestionStockGlobalActivity : AppCompatActivity() {
 
     private fun guardarStock() {
         val cantidad = binding.etCantidad.text.toString().toIntOrNull()
+        val categoriaIndex = binding.spinnerCategoria.selectedItemPosition
         val modeloIndex = binding.spinnerModelo.selectedItemPosition
+        val color = binding.spinnerColor.selectedItem?.toString()
 
         if (cantidad == null || cantidad <= 0) {
             Toast.makeText(this, "Ingrese una cantidad válida", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (categoriaIndex <= 0) {
+            Toast.makeText(this, "Seleccione una categoría", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -202,15 +209,42 @@ class GestionStockGlobalActivity : AppCompatActivity() {
             return
         }
 
-        val modelo = modelos.getOrNull(modeloIndex - 1)
-        val color = binding.spinnerColor.selectedItem?.toString()
+        val categoria = categorias[categoriaIndex - 1].nombre ?: ""
+        val modelo = modelos[modeloIndex - 1].nombre ?: ""
 
-        Toast.makeText(
-            this,
-            "Agregando $cantidad unidades de ${modelo?.nombre} ($color) a ${tallasSeleccionadas.size} tallas",
-            Toast.LENGTH_LONG
-        ).show()
+        // Preparar datos para el servidor
+        val tallasJson = tallasSeleccionadas.map { talla ->
+            mapOf("numero" to "T$talla", "stock" to cantidad)
+        }
 
-        finish()
+        val body: Map<String, Any> = mapOf(
+            "categoria" to categoria,
+            "modelo" to modelo,
+            "color" to (color ?: "Negro"),
+            "tallas" to tallasJson
+        )
+
+        lifecycleScope.launch {
+            binding.btnGuardar.isEnabled = false
+            binding.btnGuardar.text = "Guardando..."
+            
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    RetrofitClient.apiService.guardarStockGlobal(body).execute()
+                }
+
+                if (response.isSuccessful) {
+                    Toast.makeText(this@GestionStockGlobalActivity, "✅ Stock actualizado correctamente", Toast.LENGTH_SHORT).show()
+                    finish()
+                } else {
+                    Toast.makeText(this@GestionStockGlobalActivity, "❌ Error al guardar: ${response.code()}", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this@GestionStockGlobalActivity, "❌ Error de conexión", Toast.LENGTH_SHORT).show()
+            } finally {
+                binding.btnGuardar.isEnabled = true
+                binding.btnGuardar.text = "Guardar cambios"
+            }
+        }
     }
 }

@@ -69,15 +69,7 @@ class ProductosCategoriaViewModel : ViewModel() {
                     // Transformar a formato UI
                     val productosUi = productosFiltrados.map { producto ->
                         val variaciones = producto.variaciones ?: emptyList()
-                        val primeraVariacion = variaciones.firstOrNull()
-
-                        // Usar tallas del campo 'tallas' de la API si está disponible
-                        val tallas = if (producto.tallas != null && producto.tallas.isNotEmpty()) {
-                            producto.tallas
-                        } else {
-                            // Fallback: extraer de variaciones
-                            variaciones.mapNotNull { it.talla?.numero?.toString() }.distinct().sorted()
-                        }
+                        val productoId = producto.id ?: 0
 
                         // Calcular precio promedio
                         val precioPromedio = if (variaciones.isNotEmpty()) {
@@ -88,14 +80,14 @@ class ProductosCategoriaViewModel : ViewModel() {
                         } else "\$0"
 
                         ProductoUI(
-                            id = producto.id ?: 0,
+                            id = productoId,
                             nombre = producto.modelo?.nombre ?: "Sin nombre",
                             precio = precioPromedio,
                             categoria = producto.modelo?.categoria?.nombre ?: categoria,
                             subcategoria = variaciones.firstOrNull()?.colorPrimario?.nombre ?: "General",
-                            tallas = tallas.ifEmpty { listOf("N/A") },
+                            tallas = producto.tallas ?: emptyList(),
                             imagenUrl = producto.imagen,
-                            esFavorito = false
+                            esFavorito = false // Se actualizará en el Fragment usando el context
                         )
                     }
 
@@ -120,6 +112,13 @@ class ProductosCategoriaViewModel : ViewModel() {
             } else {
                 it
             }
+        }
+        _productos.value = productosActualizados
+    }
+
+    fun actualizarEstadoFavoritos(context: android.content.Context) {
+        val productosActualizados = _productos.value.map {
+            it.copy(esFavorito = FavoritosManager.esFavorito(context, it.id))
         }
         _productos.value = productosActualizados
     }

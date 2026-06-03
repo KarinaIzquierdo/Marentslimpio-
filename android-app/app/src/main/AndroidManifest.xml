@@ -24,7 +24,6 @@
             android:theme="@style/Theme.MarentsApp">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -33,6 +32,11 @@
             android:name=".ui.productos.GestionStockGlobalActivity"
             android:exported="false"
             android:label="Gestión global de stock"
+            android:theme="@style/Theme.MarentsApp" />
+
+        <activity
+            android:name=".MainMenuActivity"
+            android:exported="false"
             android:theme="@style/Theme.MarentsApp" />
     </application>
 

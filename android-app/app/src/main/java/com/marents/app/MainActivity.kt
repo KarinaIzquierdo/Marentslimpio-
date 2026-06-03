@@ -107,15 +107,10 @@ class MainActivity : AppCompatActivity(), Navigator.Provider {
         when {
             route.startsWith("productos_categoria/") -> {
                 val categoriaNombre = route.substringAfter("productos_categoria/")
-                val fragment = ProductosCategoriaFragment().apply {
-                    arguments = Bundle().apply {
-                        putString("categoriaNombre", categoriaNombre)
-                    }
-                }
-                supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, fragment)
-                    .addToBackStack(null)
-                    .commit()
+                // Si estamos en MainActivity (bienvenida), redirigimos a MainMenuActivity con la categoría
+                val intent = android.content.Intent(this, MainMenuActivity::class.java)
+                intent.putExtra("categoriaNombre", categoriaNombre)
+                startActivity(intent)
             }
             route == AppRoutes.PERSONALIZADOS -> {
                 supportFragmentManager.beginTransaction()

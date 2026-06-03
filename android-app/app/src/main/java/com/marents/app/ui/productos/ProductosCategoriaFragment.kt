@@ -11,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.navigation.fragment.findNavController
 import com.marents.app.Navigator
 import com.marents.app.R
 import com.marents.app.databinding.FragmentProductosCategoriaBinding
@@ -56,25 +57,27 @@ class ProductosCategoriaFragment : Fragment() {
     private fun setupRecyclerView() {
         productoAdapter = ProductoAdapter(
             onProductoClick = { productoUI ->
-                // Navegar a detalle del producto
+                // Navegar a detalle del producto usando el nuevo sistema
                 val bundle = Bundle().apply {
                     putInt("productoId", productoUI.id)
                     putString("productoNombre", productoUI.nombre)
                     putString("productoPrecio", productoUI.precio)
                     putString("productoImagen", productoUI.imagenUrl)
-                    putString("productoCategoria", productoUI.subcategoria)
+                    putString("productoCategoria", productoUI.categoria)
                     putStringArrayList("productoTallas", ArrayList(productoUI.tallas))
                 }
-                val detalleFragment = ProductoDetalleFragment().apply {
-                    arguments = bundle
+                
+                try {
+                    findNavController().navigate(R.id.productoDetalleFragment, bundle)
+                } catch (e: Exception) {
+                    android.util.Log.e("ProductosCategoria", "Error al navegar: ${e.message}")
                 }
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, detalleFragment)
-                    .addToBackStack(null)
-                    .commit()
             },
             onFavoritoClick = { productoUI ->
-                viewModel.toggleFavorito(productoUI)
+                // Guardar en favoritos de forma persistente
+                FavoritosManager.toggleFavorito(requireContext(), productoUI)
+                // Actualizar la UI del corazón en la lista
+                viewModel.actualizarEstadoFavoritos(requireContext())
             }
         )
 
@@ -85,18 +88,14 @@ class ProductosCategoriaFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        // Botón Volver a categorías - volver a pantalla de selección de categorías
+        // Botón Volver a categorías
         binding.btnVolverCategorias.setOnClickListener {
-            parentFragmentManager.popBackStack()
+            findNavController().popBackStack()
         }
 
-        // Botón Carrito (Bolsa)
+        // Botón Carrito (Bolsa) - Navega a la pestaña del carrito
         binding.btnCarrito.setOnClickListener {
-            val carritoFragment = CarritoFragment()
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, carritoFragment)
-                .addToBackStack(null)
-                .commit()
+            findNavController().navigate(R.id.nav_new_carrito)
         }
 
         binding.etBuscar.setOnClickListener {

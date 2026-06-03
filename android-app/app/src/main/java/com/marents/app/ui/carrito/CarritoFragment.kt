@@ -32,6 +32,9 @@ class CarritoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Ocultar botón volver por compatibilidad con el nuevo menú
+        binding.btnBack.visibility = View.GONE
+
         setupRecyclerView()
         setupClickListeners()
         cargarCarrito()
@@ -61,13 +64,15 @@ class CarritoFragment : Fragment() {
     }
 
     private fun cargarCarrito() {
-        // Obtener el userId real desde SharedPreferences (donde se guarda al hacer login)
         val prefs = requireActivity().getSharedPreferences("marents_prefs", android.content.Context.MODE_PRIVATE)
         val userId = prefs.getInt("user_id", -1)
+
+        android.util.Log.d("CarritoFragment", "Verificando ID para carrito: $userId")
 
         if (userId == -1) {
             binding.tvCarritoVacio.text = "Inicia sesión para ver tu carrito"
             binding.tvCarritoVacio.visibility = View.VISIBLE
+            binding.recyclerViewCarrito.visibility = View.GONE
             return
         }
 
@@ -126,7 +131,8 @@ class CarritoFragment : Fragment() {
             for (item in items) {
                 try {
                     cantidadTotal += item.cantidad
-                    val precioLimpio = item.precio.replace(Regex("[^0-9.]"), "")
+                    val precioSinDecimales = item.precio.split(".")[0]
+                    val precioLimpio = precioSinDecimales.replace(Regex("[^0-9]"), "")
                     val precioNumerico = precioLimpio.toDoubleOrNull() ?: 0.0
                     total += (precioNumerico.toInt() * item.cantidad)
                 } catch (e: Exception) {

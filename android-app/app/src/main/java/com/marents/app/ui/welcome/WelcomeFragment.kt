@@ -39,8 +39,10 @@ class WelcomeFragment : Fragment() {
         }
 
         binding.tvInvitado.setOnClickListener {
-            // Ir a selección de categorías como invitado
-            (activity as? MainActivity)?.navigateToFragment(AppRoutes.CATEGORIES)
+            // Iniciar la actividad que tiene el menú inferior (Navbar)
+            val intent = android.content.Intent(requireContext(), com.marents.app.MainMenuActivity::class.java)
+            startActivity(intent)
+            requireActivity().finish() // Opcional: cerrar la pantalla de bienvenida
         }
     }
 

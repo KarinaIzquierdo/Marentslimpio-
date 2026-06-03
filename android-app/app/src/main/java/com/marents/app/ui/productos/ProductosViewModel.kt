@@ -89,6 +89,22 @@ class ProductosViewModel : ViewModel() {
         _productos.value = filtrados
     }
 
+    fun ordenarPorStock(mayorAMenor: Boolean) {
+        val listaActual = todosLosProductos.toMutableList()
+        if (mayorAMenor) {
+            listaActual.sortByDescending { producto ->
+                producto.stock ?: producto.variaciones?.sumOf { it.stock ?: 0 } ?: 0
+            }
+        } else {
+            listaActual.sortBy { producto ->
+                producto.stock ?: producto.variaciones?.sumOf { it.stock ?: 0 } ?: 0
+            }
+        }
+        todosLosProductos = listaActual
+        _paginaActual.value = 1
+        aplicarPaginacion()
+    }
+
     fun cambiarPagina(pagina: Int) {
         val total = _totalPaginas.value ?: 1
         if (pagina in 1..total) {

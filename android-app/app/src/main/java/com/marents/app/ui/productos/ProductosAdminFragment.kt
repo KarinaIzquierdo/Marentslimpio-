@@ -46,9 +46,21 @@ class ProductosAdminFragment : Fragment() {
 
     private fun setupRecyclerView() {
         adapter = ProductosAdminAdapter(
+            onVerClick = { producto ->
+                mostrarFichaInformativa(producto)
+            },
             onEditClick = { producto ->
                 // Cambiar a fragmento de edición en pantalla completa
                 val fragment = EditarProductoFragment.newInstance(producto)
+                
+                // Escuchar cuando se cierra el fragmento para recargar la lista
+                parentFragmentManager.setFragmentResultListener("requestKey", viewLifecycleOwner) { _, bundle ->
+                    val updated = bundle.getBoolean("updated", false)
+                    if (updated) {
+                        viewModel.cargarProductos()
+                    }
+                }
+
                 parentFragmentManager.beginTransaction()
                     .replace(R.id.fragment_container, fragment)
                     .addToBackStack(null)
@@ -69,20 +81,35 @@ class ProductosAdminFragment : Fragment() {
 
     private fun setupSpinners() {
         // Spinner de categorías
-        val categorias = arrayOf("Todas las categorías", "Hombre", "Mujer", "Niño", "Pisa huevos")
+        val categorias = arrayOf("Todas las categorías", "Hombre", "mujer", "Niños", "Pisa huevos", "Outlet")
         val categoriaAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, categorias)
         categoriaAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerCategorias.adapter = categoriaAdapter
 
+        binding.spinnerCategorias.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val categoria = categorias[position]
+                if (categoria == "Todas las categorías") {
+                    viewModel.cargarProductos()
+                } else {
+                    viewModel.buscarProductos(categoria)
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
         // Spinner de ordenamiento
-        val ordenamientos = arrayOf("Ordenar stock", "Mayor stock", "Menor stock", "Mayor precio", "Menor precio")
+        val ordenamientos = arrayOf("Ordenar stock", "Mayor stock", "Menor stock")
         val ordenAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, ordenamientos)
         ordenAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerOrdenar.adapter = ordenAdapter
 
         binding.spinnerOrdenar.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                // TODO: Implementar ordenamiento
+                when (position) {
+                    1 -> viewModel.ordenarPorStock(true) // Mayor stock
+                    2 -> viewModel.ordenarPorStock(false) // Menor stock
+                }
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
@@ -165,6 +192,52 @@ class ProductosAdminFragment : Fragment() {
             }
             .setNegativeButton("Cancelar", null)
             .show()
+    }
+
+    private fun mostrarFichaInformativa(producto: com.marents.app.Producto) {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_info_producto, null)
+        val dialog = android.app.AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        // Vincular vistas
+        val ivProducto = dialogView.findViewById<android.widget.ImageView>(R.id.ivProductoInfo)
+        val tvNombre = dialogView.findViewById<android.widget.TextView>(R.id.tvNombreInfo)
+        val tvCategoria = dialogView.findViewById<android.widget.TextView>(R.id.tvCategoriaInfo)
+        val tvPrecio = dialogView.findViewById<android.widget.TextView>(R.id.tvPrecioInfo)
+        val tvCosto = dialogView.findViewById<android.widget.TextView>(R.id.tvCostoInfo)
+        val tvStock = dialogView.findViewById<android.widget.TextView>(R.id.tvStockInfo)
+        val tvTallas = dialogView.findViewById<android.widget.TextView>(R.id.tvTallasInfo)
+        val btnCerrar = dialogView.findViewById<android.widget.Button>(R.id.btnCerrarInfo)
+
+        // Asignar datos
+        tvNombre.text = producto.modelo?.nombre ?: "Sin nombre"
+        tvCategoria.text = producto.modelo?.categoria?.nombre ?: "Sin categoría"
+        
+        val formatter = java.text.DecimalFormat("$ #,###")
+        val precio = producto.precio?.toDoubleOrNull() ?: 0.0
+        val costo = producto.costo?.toDoubleOrNull() ?: 0.0
+        tvPrecio.text = formatter.format(precio)
+        tvCosto.text = formatter.format(costo)
+        
+        val stock = producto.stock ?: producto.variaciones?.sumOf { it.stock ?: 0 } ?: 0
+        tvStock.text = stock.toString()
+
+        val tallas = producto.tallas?.joinToString(", ") 
+            ?: producto.variaciones?.mapNotNull { it.talla?.numero?.toString() }?.distinct()?.joinToString(", ")
+            ?: "N/A"
+        tvTallas.text = tallas
+
+        // Cargar imagen si existe
+        if (!producto.imagen.isNullOrEmpty()) {
+            // Aquí puedes usar Glide o Coil para cargar la imagen
+            // Por ahora dejamos el placeholder
+        }
+
+        btnCerrar.setOnClickListener { dialog.dismiss() }
+        
+        dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+        dialog.show()
     }
 
     private fun actualizarInfoPaginacion() {

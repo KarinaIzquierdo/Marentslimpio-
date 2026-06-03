@@ -21,7 +21,16 @@ data class Producto(
     val tallas: List<String>? = null,
 
     @SerializedName(value = "variaciones", alternate = ["variations"])
-    val variaciones: List<Variacion>? = emptyList()
+    val variaciones: List<Variacion>? = emptyList(),
+
+    @SerializedName("precio")
+    val precio: String? = null,
+
+    @SerializedName("costo")
+    val costo: String? = null,
+
+    @SerializedName("stock")
+    val stock: Int? = null
 ) : Serializable
 
 data class Modelo(

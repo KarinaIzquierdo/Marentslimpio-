@@ -15,6 +15,49 @@ class UsuarioController extends Controller
         return view('admin.usuarios.index', compact('usuarios'));
     }
 
+    public function storeApi(Request $request)
+    {
+        try {
+            $request->validate([
+                'nombres' => 'required|string|max:255',
+                'apellidos' => 'required|string|max:255',
+                'email' => 'required|email|unique:users',
+                'documento' => 'required|string|max:255|unique:users',
+                'celular' => 'required|string|max:255',
+                'rol' => 'required|in:admin,cliente',
+                'password' => 'required|string|min:8',
+            ]);
+
+            $usuario = User::create([
+                'nombres' => $request->nombres,
+                'apellidos' => $request->apellidos,
+                'email' => $request->email,
+                'documento' => $request->documento,
+                'celular' => $request->celular,
+                'rol' => $request->rol,
+                'password' => bcrypt($request->password),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuario creado correctamente',
+                'user' => $usuario
+            ], 201);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error del servidor: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function edit($id)
     {
         $usuario = User::findOrFail($id);

@@ -39,14 +39,13 @@ class CarritoAdapter(
             tvTalla.text = "Talla: ${item.talla ?: "N/A"}"
             tvCantidad.text = "Cantidad: ${item.cantidad}"
             
-            // Formatear precio de forma segura
+            // Formatear precio con puntos de mil y sin decimales
             val precioStr = item.precio ?: "0"
-            val precioFormateado = if (precioStr.startsWith("$")) {
-                precioStr
-            } else {
-                "$${precioStr}"
-            }
-            tvPrecio.text = precioFormateado
+            // Eliminar decimales si existen (.00)
+            val precioSinDecimales = precioStr.split(".")[0]
+            val precioLimpio = precioSinDecimales.replace(Regex("[^0-9]"), "")
+            val precioNumerico = precioLimpio.toIntOrNull() ?: 0
+            tvPrecio.text = "$${formatPrecio(precioNumerico)}"
 
             // Cargar imagen con placeholder para evitar cierres
             ivProducto.setImageResource(R.drawable.ic_shoe_placeholder)
@@ -55,6 +54,10 @@ class CarritoAdapter(
             btnEliminar.setOnClickListener {
                 onDeleteClick(item)
             }
+        }
+
+        private fun formatPrecio(precio: Int): String {
+            return java.text.NumberFormat.getInstance(java.util.Locale("es", "CO")).format(precio)
         }
     }
 

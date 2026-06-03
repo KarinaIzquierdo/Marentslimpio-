@@ -77,20 +77,24 @@ class LoginFragment : Fragment() {
                         if (success) {
                             val user = viewModel.user.value
                             
-                            // GUARDAR ID DE USUARIO EN PREFERENCIAS
+                            // --- CRÍTICO: GUARDAR ID DE USUARIO ---
                             user?.id?.let { id ->
                                 val prefs = requireActivity().getSharedPreferences("marents_prefs", android.content.Context.MODE_PRIVATE)
                                 prefs.edit().putInt("user_id", id).apply()
+                                android.util.Log.d("LoginFragment", "ID Guardado con éxito: $id")
                             }
 
                             Toast.makeText(requireContext(), "Login exitoso", Toast.LENGTH_SHORT).show()
 
-                            // Verificar el rol del usuario y redirigir accordingly
+                            // Verificar el rol del usuario y redirigir
+                            // Si es admin, va al panel de admin. CUALQUIER OTRA COSA (incluyendo usuarios nuevos o sin rol) va a MainMenuActivity
                             if (user?.rol == "admin") {
                                 (activity as? MainActivity)?.navigateToFragment(AppRoutes.ADMIN)
                             } else {
-                                // Navegar a selección de categorías para usuarios normales
-                                (activity as? MainActivity)?.navigateToFragment(AppRoutes.CATEGORIES)
+                                // Redirigir a la actividad principal de compras para todos los demás
+                                val intent = android.content.Intent(requireContext(), com.marents.app.MainMenuActivity::class.java)
+                                intent.flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                startActivity(intent)
                             }
                             viewModel.resetLoginSuccess()
                         }

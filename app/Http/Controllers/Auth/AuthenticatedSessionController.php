@@ -3,65 +3,42 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\DB;
 
 class AuthenticatedSessionController extends Controller
 {
-    /**
-     * Display the login view.
-     */
     public function create(): View
     {
         return view('auth.login');
     }
 
-    /**
-     * Handle an incoming authentication request.
-     */
-public function store(Request $request): RedirectResponse
-{
-    $user = \App\Models\User::where('email', $request->email)->first();
+    public function store(Request $request): RedirectResponse
+    {
+        $user = DB::table('users')->where('email', $request->email)->first();
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return back()->withErrors(['email' => 'Credenciales incorrectas'])->onlyInput('email');
+        }
 
-    if (!$user || !\Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
-        return back()->withErrors([
-            'email' => 'Credenciales incorrectas',
-        ])->onlyInput('email');
+        Auth::loginUsingId($user->id);
+        $request->session()->regenerate();
+
+        return $user->rol === 'admin' ? redirect('/admin/dashboard') : redirect('/');
     }
 
-    // 🔥 LOGIN MANUAL
-    Auth::login($user);
-
-    $request->session()->regenerate();
-
-    // 🔥 REDIRECCIÓN POR ROL
-    if ($user->rol === 'admin') {
-        return redirect('/admin/dashboard');
-    }
-
-    return redirect('/');
-}
-    /**
-     * Destroy an authenticated session.
-     */
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
-
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
-
         return redirect('/');
     }
 
-    /**
-     * Handle an API authentication request.
-     */
     public function loginApi(Request $request)
     {
         $request->validate([
@@ -69,19 +46,55 @@ public function store(Request $request): RedirectResponse
             'password' => 'required',
         ]);
 
-        $user = \App\Models\User::where('email', $request->email)->first();
-
+        $user = DB::table('users')->where('email', $request->email)->first();
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'Credenciales incorrectas'
-            ], 401);
+            return response()->json(['message' => 'Credenciales incorrectas'], 401);
         }
 
-        // Aquí podrías generar un token si usaras Sanctum, 
-        // por ahora devolvemos los datos del usuario
-        return response()->json([
-            'user' => $user,
-            'message' => 'Login exitoso'
-        ]);
+        return response()->json(['user' => $user, 'message' => 'Login exitoso']);
+    }
+
+    public function logoutApi(Request $request)
+    {
+        return response()->json(['success' => true, 'message' => 'Sesión cerrada correctamente']);
+    }
+
+    public function registerApi(Request $request)
+    {
+        try {
+            $request->validate([
+                'nombres' => 'required|string|max:255',
+                'apellidos' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8',
+            ]);
+
+            $id = DB::table('users')->insertGetId([
+                'nombres' => $request->nombres,
+                'apellidos' => $request->apellidos,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'rol' => 'cliente',
+                'documento' => $request->documento ?? '',
+                'celular' => $request->celular ?? '',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $user = DB::table('users')->where('id', $id)->first();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuario registrado correctamente',
+                'user' => $user
+            ], 201);
+
+        } catch (\Exception $e) {
+            Log::error("❌ Error en registro API: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al registrar: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

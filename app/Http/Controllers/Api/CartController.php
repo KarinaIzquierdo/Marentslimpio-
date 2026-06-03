@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class CartController extends Controller
 {
@@ -142,27 +143,31 @@ class CartController extends Controller
         try {
             DB::beginTransaction();
 
-            // 1. Obtener variacion_id para ese producto y talla
+            // 1. Obtener talla_id por número (manejando posibles .0 de la BD)
+            $talla = DB::table('talla')
+                ->where('numero', $tallaNombre)
+                ->orWhere('numero', $tallaNombre . '.0')
+                ->first();
+            
+            if (!$talla) {
+                return response()->json(['error' => 'La talla ' . $tallaNombre . ' no existe en el sistema'], 404);
+            }
+
+            // 2. Obtener variacion_id
             $variacion = DB::table('producto_variacion')
-                ->join('talla', 'producto_variacion.talla_id', '=', 'talla.id')
-                ->where('producto_variacion.producto_id', $productoId)
-                ->where('talla.numero', $tallaNombre)
-                ->select('producto_variacion.id')
+                ->where('producto_id', $productoId)
+                ->where('talla_id', $talla->id)
                 ->first();
 
             if (!$variacion) {
-                // Si la variación no existe, intentamos buscar la talla por número
-                $talla = DB::table('talla')->where('numero', $tallaNombre)->first();
-                if (!$talla) {
-                    return response()->json(['error' => 'La talla ' . $tallaNombre . ' no existe en el sistema'], 404);
-                }
+                // Si no existe, crearla con un precio por defecto de 75000
+                $precioBase = 75000; 
 
-                // Creamos la variación automáticamente para que no de error 404
                 $variacionId = DB::table('producto_variacion')->insertGetId([
                     'producto_id' => $productoId,
                     'talla_id' => $talla->id,
-                    'color_id' => 1, // Color por defecto
-                    'precio' => null,
+                    'color_id' => 1,
+                    'precio' => $precioBase,
                     'stock' => 10,
                     'costo' => 0,
                     'tiene_descuento' => 0
@@ -171,18 +176,7 @@ class CartController extends Controller
                 $variacionId = $variacion->id;
             }
 
-            // 2. Obtener o crear carrito para el usuario
-            // Validamos que el usuario_id sea válido (existe en users o en la tabla que manejes)
-            $usuarioExiste = DB::table('users')->where('id', $usuarioId)->exists();
-            if (!$usuarioExiste) {
-                // Si no existe en 'users', probamos en 'usuario' por si acaso
-                $usuarioExiste = DB::table('usuario')->where('id', $usuarioId)->exists();
-            }
-
-            if (!$usuarioExiste) {
-                 return response()->json(['error' => 'Usuario no encontrado (ID: ' . $usuarioId . ')'], 404);
-            }
-
+            // 3. Obtener o crear carrito para el usuario
             $carrito = DB::table('carrito')->where('usuario_id', $usuarioId)->first();
             if (!$carrito) {
                 $carritoId = DB::table('carrito')->insertGetId([
@@ -191,11 +185,10 @@ class CartController extends Controller
                 ]);
             } else {
                 $carritoId = $carrito->id;
-                // Actualizar la fecha del carrito para que los 3 días cuenten desde la última actividad
                 DB::table('carrito')->where('id', $carritoId)->update(['fecha' => now()]);
             }
 
-            // 3. Verificar si el item ya existe en el carrito
+            // 4. Verificar si el item ya existe en el detalle
             $itemExistente = DB::table('carrito_detalle')
                 ->where('carrito_id', $carritoId)
                 ->where('producto_variacion_id', $variacionId)

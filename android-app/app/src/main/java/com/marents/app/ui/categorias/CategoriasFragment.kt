@@ -7,17 +7,14 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.marents.app.Navigator
+import com.marents.app.R
 import com.marents.app.databinding.FragmentCategoriesBinding
 import com.marents.app.CategoriaImages
 import coil.load
 import coil.transform.CircleCropTransformation
 
-/**
- * Fragment de Selección de Categorías
- * Muestra: Dama, Caballero, Niña, Niño distribuidas uniformemente
- * Navega a Home al seleccionar una categoría
- */
 class CategoriasFragment : Fragment() {
 
     private var _binding: FragmentCategoriesBinding? = null
@@ -35,94 +32,86 @@ class CategoriasFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         cargarImagenes()
         setupClickListeners()
     }
 
     private fun cargarImagenes() {
-        binding.ivMujer.load(CategoriaImages.MUJER) {
-            crossfade(true)
-            placeholder(android.R.drawable.progress_indeterminate_horizontal)
-        }
-        binding.ivHombre.load(CategoriaImages.HOMBRE) {
-            crossfade(true)
-            placeholder(android.R.drawable.progress_indeterminate_horizontal)
-        }
-        
-        // Uso de links directos para evitar errores de compilación con archivos locales
-        binding.ivNinos.load(CategoriaImages.NINOS) {
+        binding.ivMujer.load(CategoriaImages.MUJER) { crossfade(true) }
+        binding.ivHombre.load(CategoriaImages.HOMBRE) { crossfade(true) }
+        binding.ivNinos.load(CategoriaImages.NINOS) { 
             crossfade(true)
             transformations(CircleCropTransformation())
         }
-        
         binding.ivPisahuevos.load(CategoriaImages.PISAHUEVOS) {
             crossfade(true)
             transformations(CircleCropTransformation())
         }
-        
         binding.ivPersonalizados.load(CategoriaImages.PERSONALIZADOS) {
             crossfade(true)
             transformations(CircleCropTransformation())
         }
-        
-        binding.ivOutlet.load(CategoriaImages.OUTLET) {
+        binding.ivOutlet.load(R.drawable.img_outlet) {
             crossfade(true)
+            transformations(CircleCropTransformation())
         }
     }
 
-    /**
-     * Configura los click listeners para cada categoría
-     */
     private fun setupClickListeners() {
-        // Botón Volver al inicio - regresa a pantalla principal
+        binding.btnVolverInicio.visibility = View.VISIBLE
         binding.btnVolverInicio.setOnClickListener {
-            parentFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            // Regresar a la pantalla de bienvenida (MainActivity)
+            val intent = android.content.Intent(requireContext(), com.marents.app.MainActivity::class.java)
+            intent.flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
         }
 
         binding.btnMujer.setOnClickListener {
-            // Navegar a la pantalla de productos de Mujer (Dama en BD)
-            (activity as? Navigator.Provider)?.getNavigator()?.navigateToProductosCategoria("Dama")
+            navegarACategoria("Mujer")
         }
 
         binding.btnHombre.setOnClickListener {
-            // Navegar a la pantalla de productos de Hombre (Caballero en BD)
-            (activity as? Navigator.Provider)?.getNavigator()?.navigateToProductosCategoria("Caballero")
+            navegarACategoria("Hombre")
         }
 
         binding.btnNinos.setOnClickListener {
-            // Navegar a la pantalla de productos de Niños (Niño en BD)
-            (activity as? Navigator.Provider)?.getNavigator()?.navigateToProductosCategoria("Niño")
+            // Sincronizado con el nombre exacto en el servidor Laravel
+            navegarACategoria("Niños")
         }
 
         binding.btnPisahuevos.setOnClickListener {
-            // Navegar a la pantalla de productos de Pisa huevos (Ortografía correcta para el título)
-            (activity as? Navigator.Provider)?.getNavigator()?.navigateToProductosCategoria("Pisa huevos")
+            navegarACategoria("Pisa huevos")
         }
 
         binding.btnPersonalizados.setOnClickListener {
-            // Navegar a la pantalla de Personalización
-            (activity as? Navigator.Provider)?.getNavigator()?.navigateToPersonalizados()
+            navegarACategoria("Personalizados")
         }
 
         binding.btnOutlet.setOnClickListener {
-            // Navegar a la pantalla de Outlet (podemos usar una categoría específica o filtro)
-            (activity as? Navigator.Provider)?.getNavigator()?.navigateToProductosCategoria("Outlet")
+            navegarACategoria("Outlet")
         }
     }
 
-    /**
-     * Navega a Home con la categoría seleccionada
-     */
-    private fun navegarACategoria(nombreCategoria: String) {
-        Toast.makeText(
-            requireContext(),
-            "Seleccionado: $nombreCategoria",
-            Toast.LENGTH_SHORT
-        ).show()
-
-        // Navegar a Home
-        (activity as? Navigator.Provider)?.getNavigator()?.navigateToHome()
+    private fun navegarACategoria(nombre: String) {
+        val bundle = Bundle().apply {
+            putString("categoriaNombre", nombre)
+        }
+        
+        try {
+            // Método estándar de navegación de Jetpack Navigation
+            // Este es el más fiable dentro de MainMenuActivity
+            findNavController().navigate(R.id.productosCategoriaFragment, bundle)
+        } catch (e: Exception) {
+            android.util.Log.e("CategoriasFragment", "Error navegando a $nombre: ${e.message}")
+            // Fallback en caso de que el controlador se pierda
+            try {
+                val navHostFragment = requireActivity().supportFragmentManager
+                    .findFragmentById(R.id.nav_host_fragment_main) as? androidx.navigation.fragment.NavHostFragment
+                navHostFragment?.navController?.navigate(R.id.productosCategoriaFragment, bundle)
+            } catch (e2: Exception) {
+                Toast.makeText(requireContext(), "Error al abrir la categoría", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun onDestroyView() {

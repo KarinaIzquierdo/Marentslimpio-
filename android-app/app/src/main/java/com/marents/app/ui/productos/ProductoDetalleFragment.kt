@@ -69,7 +69,14 @@ class ProductoDetalleFragment : Fragment() {
     private fun setupUI() {
         binding.tvNombreModelo.text = producto.nombre
         binding.tvCategoria.text = producto.subcategoria
-        binding.tvPrecio.text = producto.precio
+        
+        // Formatear precio con puntos de mil
+        val precioStr = producto.precio ?: "0"
+        val precioSinDecimales = precioStr.split(".")[0]
+        val precioLimpio = precioSinDecimales.replace(Regex("[^0-9]"), "")
+        val precioNumerico = precioLimpio.toIntOrNull() ?: 0
+        binding.tvPrecio.text = "$${formatPrecio(precioNumerico)}"
+        
         binding.tvCantidad.text = cantidad.toString()
 
         // Cargar imagen
@@ -101,14 +108,16 @@ class ProductoDetalleFragment : Fragment() {
 
         // Obtener tallas del producto o usar por defecto según categoría
         val categoriaLower = producto.categoria?.lowercase() ?: ""
-        
-        var tallasDisponibles = if (producto.tallas.isNotEmpty()) {
-            // Si el producto tiene tallas, usarlas
-            producto.tallas.mapNotNull { 
-                it.replace(".0", "").toIntOrNull() 
-            }.sorted()
+
+        // Intentar obtener tallas del producto (numéricas)
+        val tallasParseadas = producto.tallas.mapNotNull {
+            it.replace(".0", "").toIntOrNull()
+        }.sorted()
+
+        // Fallback por categoría si no hay tallas parseables
+        var tallasDisponibles = if (tallasParseadas.isNotEmpty()) {
+            tallasParseadas
         } else {
-            // Si no tiene tallas, usar rangos por defecto según categoría
             when {
                 categoriaLower.contains("niño") || categoriaLower.contains("nino") || categoriaLower.contains("infantil") -> {
                     (20..34).toList() // Tallas niños
@@ -118,6 +127,15 @@ class ProductoDetalleFragment : Fragment() {
                 }
                 categoriaLower.contains("caballero") || categoriaLower.contains("hombre") -> {
                     (38..45).toList() // Tallas caballero
+                }
+                categoriaLower.contains("pisa huevos") || categoriaLower.contains("pisahuevos") -> {
+                    (35..45).toList() // Tallas pisa huevos (adulto)
+                }
+                categoriaLower.contains("personalizado") -> {
+                    (35..45).toList() // Tallas personalizados (adulto)
+                }
+                categoriaLower.contains("outlet") -> {
+                    (35..45).toList() // Tallas outlet (mixto)
                 }
                 else -> {
                     (35..45).toList() // Por defecto, todas las tallas
@@ -233,8 +251,14 @@ class ProductoDetalleFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            // TODO: Obtener el userId real del usuario logueado. Por ahora usamos 1 para pruebas.
-            val userId = 1 
+            val prefs = requireActivity().getSharedPreferences("marents_prefs", android.content.Context.MODE_PRIVATE)
+            val userId = prefs.getInt("user_id", -1)
+
+            if (userId == -1) {
+                Toast.makeText(requireContext(), "Inicia sesión para agregar al carrito", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val request = AddToCartRequest(
                 userId = userId,
                 productoId = producto.id,
@@ -283,6 +307,10 @@ class ProductoDetalleFragment : Fragment() {
         }
 
         dialog.show()
+    }
+
+    private fun formatPrecio(precio: Int): String {
+        return java.text.NumberFormat.getInstance(java.util.Locale("es", "CO")).format(precio)
     }
 
     override fun onDestroyView() {

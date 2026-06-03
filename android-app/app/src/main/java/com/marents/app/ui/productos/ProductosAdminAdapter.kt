@@ -12,6 +12,7 @@ import com.marents.app.Producto
 import com.marents.app.R
 
 class ProductosAdminAdapter(
+    private val onVerClick: (Producto) -> Unit,
     private val onEditClick: (Producto) -> Unit,
     private val onDeleteClick: (Producto) -> Unit
 ) : RecyclerView.Adapter<ProductosAdminAdapter.ProductoViewHolder>() {
@@ -28,7 +29,7 @@ class ProductosAdminAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductoViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_producto_tabla, parent, false)
-        return ProductoViewHolder(view, onEditClick, onDeleteClick)
+        return ProductoViewHolder(view, onVerClick, onEditClick, onDeleteClick)
     }
 
     override fun onBindViewHolder(holder: ProductoViewHolder, position: Int) {
@@ -37,6 +38,7 @@ class ProductosAdminAdapter(
 
     class ProductoViewHolder(
         itemView: View,
+        private val onVerClick: (Producto) -> Unit,
         private val onEditClick: (Producto) -> Unit,
         private val onDeleteClick: (Producto) -> Unit
     ) : RecyclerView.ViewHolder(itemView) {
@@ -71,6 +73,7 @@ class ProductosAdminAdapter(
         private val tvCosto: TextView = itemView.findViewById(R.id.tvCosto)
         private val tvPrecio: TextView = itemView.findViewById(R.id.tvPrecio)
         private val tvGanancia: TextView = itemView.findViewById(R.id.tvGanancia)
+        private val btnVer: View = itemView.findViewById(R.id.btnVer)
         private val btnEdit: View = itemView.findViewById(R.id.btnEdit)
         private val btnDelete: View = itemView.findViewById(R.id.btnDelete)
 
@@ -79,27 +82,30 @@ class ProductosAdminAdapter(
             tvNombre.text = producto.modelo?.nombre ?: "Sin nombre"
             tvCategoria.text = producto.modelo?.categoria?.nombre ?: "General"
 
-            // Variaciones para cálculos
-            val variaciones = producto.variaciones ?: emptyList()
-            
-            // Stock total
-            val stockTotal = variaciones.sumOf { it.stock ?: 0 }
+            // Stock total (Prioridad al campo directo de producto)
+            val stockTotal = producto.stock ?: producto.variaciones?.sumOf { it.stock ?: 0 } ?: 0
             tvStock.text = stockTotal.toString()
 
-            // Costo y Precio (formateados con miles)
-            val costoPromedio = variaciones.mapNotNull { it.costo?.toDoubleOrNull() }.average().takeIf { !it.isNaN() } ?: 0.0
-            val precioPromedio = variaciones.mapNotNull { it.precio?.toDoubleOrNull() }.average().takeIf { !it.isNaN() } ?: 0.0
+            // Costo y Precio (Prioridad al campo directo de producto)
+            val precioVal = producto.precio?.toDoubleOrNull() 
+                ?: producto.variaciones?.mapNotNull { it.precio?.toDoubleOrNull() }?.average()?.takeIf { !it.isNaN() } 
+                ?: 0.0
+                
+            val costoVal = producto.costo?.toDoubleOrNull()
+                ?: producto.variaciones?.mapNotNull { it.costo?.toDoubleOrNull() }?.average()?.takeIf { !it.isNaN() }
+                ?: 0.0
             
             val formatter = java.text.DecimalFormat("$ #,###")
-            tvCosto.text = formatter.format(costoPromedio).replace(",", ".")
-            tvPrecio.text = formatter.format(precioPromedio).replace(",", ".")
+            tvCosto.text = formatter.format(costoVal).replace(",", ".")
+            tvPrecio.text = formatter.format(precioVal).replace(",", ".")
             
             // Ganancia
-            val ganancia = (precioPromedio - costoPromedio).toInt()
+            val ganancia = (precioVal - costoVal).toInt()
             tvGanancia.text = formatter.format(ganancia).replace(",", ".")
             tvGanancia.setTextColor(if (ganancia >= 0) 0xFF10B981.toInt() else 0xFFEF4444.toInt())
 
             // Acciones
+            btnVer.setOnClickListener { onVerClick(producto) }
             btnEdit.setOnClickListener { onEditClick(producto) }
             btnDelete.setOnClickListener { onDeleteClick(producto) }
         }

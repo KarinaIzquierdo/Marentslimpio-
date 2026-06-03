@@ -105,7 +105,7 @@
                             android:background="@drawable/bg_input_field"
                             android:hint="Buscar producto..."
                             android:paddingHorizontal="16dp"
-                            android:drawableStart="@drawable/ic_search"
+                            android:drawableStart="@drawable/ic_nav_shop"
                         
                         
                             android:drawablePadding="12dp"

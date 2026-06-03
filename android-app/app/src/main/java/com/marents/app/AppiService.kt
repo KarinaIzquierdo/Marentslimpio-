@@ -38,6 +38,9 @@ interface ApiService {
     @POST("productos")
     fun crearProductoSimple(@FieldMap params: Map<String, String>): Call<Producto>
 
+    @POST("productos/global")
+    fun guardarStockGlobal(@Body data: Map<String, @JvmSuppressWildcards Any>): Call<Map<String, Any>>
+
     @GET("productos")
     fun getProductos(): Call<List<Producto>>
 
@@ -97,7 +100,19 @@ interface ApiService {
     @DELETE("users/{id}")
     fun eliminarUsuario(@Path("id") id: Int): Call<Void>
 
-    @GET("cart")
+   @FormUrlEncoded
+   @POST("users")
+   fun crearUsuario(
+       @Field("nombres") nombres: String,
+       @Field("apellidos") apellidos: String,
+       @Field("email") email: String,
+       @Field("documento") documento: String?,
+       @Field("celular") celular: String?,
+       @Field("rol") rol: String,
+       @Field("password") password: String
+   ): Call<Map<String, Any>>
+
+   @GET("cart")
     fun getCart(@Query("user_id") userId: Int): Call<List<CartItem>>
 
     @POST("cart/add")
