@@ -4,4 +4,4 @@
     <item android:color="#000000" android:state_checked="true" />
     <!-- Color por defecto (Gris) -->
     <item android:color="#757575" />
-</selector>
+</selector>|

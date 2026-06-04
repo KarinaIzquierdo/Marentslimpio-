@@ -165,8 +165,12 @@ class RegisterFragment : Fragment() {
                             }
 
                             Toast.makeText(requireContext(), "Registro exitoso", Toast.LENGTH_SHORT).show()
-                            // Navega a selección de categorías antes del Home
-                            (activity as? Navigator.Provider)?.getNavigator()?.navigateToCategories()
+                            
+                            // ABRIR MAIN MENU ACTIVITY (La que tiene el Navbar y Categorías)
+                            val intent = android.content.Intent(requireContext(), com.marents.app.MainMenuActivity::class.java)
+                            intent.flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            startActivity(intent)
+                            
                             viewModel.resetRegisterSuccess()
                         }
                     }

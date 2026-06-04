@@ -63,22 +63,40 @@
         android:focusable="false"
         android:clickable="true" />
 
-    <!-- RecyclerView de productos -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewProductos"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="8dp"
-        android:clipToPadding="false" />
+        android:layout_weight="1">
 
-    <!-- ProgressBar -->
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone"
-        android:indeterminateTint="#FFFFFF" />
+        <!-- RecyclerView de productos -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewProductos"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            android:clipToPadding="false" />
+
+        <!-- Botón flotante de WhatsApp -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabWhatsapp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="24dp"
+            android:src="@drawable/ic_whatsapp"
+            app:backgroundTint="#25D366"
+            app:tint="#FFFFFF"
+            android:visibility="gone"
+            android:contentDescription="Chat por WhatsApp" />
+
+        <!-- ProgressBar -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:indeterminateTint="#FFFFFF" />
+    </FrameLayout>
 
 </LinearLayout>

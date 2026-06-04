@@ -159,7 +159,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="32dp"
-                    android:text="niños"
+                    android:text="Niños"
                     android:textColor="#333333"
                     android:textSize="26sp" />
             </LinearLayout>
@@ -286,7 +286,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="32dp"
-                    android:text="outlet"
+                    android:text="Outlet"
                     android:textColor="#333333"
                     android:textSize="26sp" />
             </LinearLayout>

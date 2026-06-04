@@ -180,9 +180,8 @@
                 <!-- Botón Contáctanos -->
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btnContactanos"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
                     android:layout_marginTop="24dp"
                     android:text="Contáctanos"
                     android:textColor="#FFFFFF"
@@ -191,6 +190,22 @@
                     android:paddingHorizontal="32dp"
                     android:paddingVertical="12dp"
                     android:background="@drawable/bg_button_green" />
+
+                <!-- Botón WhatsApp -->
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnWhatsapp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Chat por WhatsApp"
+                    android:textColor="#FFFFFF"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
+                    android:paddingHorizontal="32dp"
+                    android:paddingVertical="12dp"
+                    android:drawableStart="@drawable/ic_whatsapp"
+                    android:drawablePadding="12dp"
+                    android:background="@drawable/bg_button_black" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>

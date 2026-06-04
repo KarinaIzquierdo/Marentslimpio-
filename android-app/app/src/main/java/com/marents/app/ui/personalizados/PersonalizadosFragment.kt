@@ -49,6 +49,21 @@ class PersonalizadosFragment : Fragment() {
                 Toast.makeText(requireContext(), "No se pudo abrir el correo", Toast.LENGTH_SHORT).show()
             }
         }
+
+        binding.btnWhatsapp.setOnClickListener {
+            val phone = "+573000000000" // Reemplaza con el número real de la tienda
+            val message = "Hola Marents! Me interesa personalizar unos zapatos."
+            val url = "https://api.whatsapp.com/send?phone=$phone&text=${Uri.encode(message)}"
+            
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                data = Uri.parse(url)
+            }
+            try {
+                startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "WhatsApp no está instalado", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun onDestroyView() {

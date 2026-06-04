@@ -40,6 +40,22 @@ class ProductosCategoriaFragment : Fragment() {
         val categoriaNombre = arguments?.getString("categoriaNombre") ?: "Productos"
         binding.tvTituloCategoria.text = categoriaNombre
 
+        // Mostrar botón de WhatsApp solo si es Personalizados
+        if (categoriaNombre.lowercase().contains("personalizado")) {
+            binding.fabWhatsapp.visibility = View.VISIBLE
+            binding.fabWhatsapp.setOnClickListener {
+                val phone = "+573000000000" // Reemplaza con el número real
+                val message = "Hola Marents! Me interesa personalizar unos zapatos."
+                val url = "https://api.whatsapp.com/send?phone=$phone&text=${android.net.Uri.encode(message)}"
+                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
+                try {
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Toast.makeText(requireContext(), "WhatsApp no está instalado", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
         setupRecyclerView()
         setupClickListeners()
         observeViewModel()
